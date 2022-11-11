@@ -19,10 +19,10 @@
         }
         public class TodoItem
         {
-            int status;
-            int priority;
-            string task;
-            string taskDescription;
+            public int status;
+            public int priority;
+            public string task;
+            public string taskDescription;
             public TodoItem(int priority, string task)
             {
                 this.status = Active;
