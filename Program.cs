@@ -107,6 +107,7 @@
         public static void Main(string[] args)
         {
             Console.WriteLine("Välkommen till att-göra-listan!");
+            Console.WriteLine("TEST LINE");
             Todo.ReadListFromFile();
             Todo.PrintHelp();
             string command;
