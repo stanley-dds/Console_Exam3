@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
@@ -95,7 +96,7 @@ namespace dtp15_todolist
         }
         public static async void WriteListToFile(string nameOfFile = "TomkisToDo.lis")
         {
-            Console.Write($"Sparas till default filen {nameOfFile} ... \n");
+            Console.Write($"Sparas till filen {nameOfFile} ... \n");
             if (File.Exists(nameOfFile))
             {
                 if (nameOfFile == fileInUse)
@@ -180,14 +181,40 @@ namespace dtp15_todolist
         public static void PrintHelp()
         {
             Console.WriteLine("Kommandon:\n");
-            Console.WriteLine("ladda                   Skriv ladda filnamn.lis för specifierad val av filen");
-            Console.WriteLine("hjälp                   lista denna hjälp");
-            Console.WriteLine("lista                   lista att-göra-listan");
-            Console.WriteLine("sluta                   spara att-göra-listan och sluta");
+            Console.WriteLine("hjälp                              lista denna hjälp\n");
+
+            Console.WriteLine("ladda                              ladda filen (default - TomkisToDo.lis)");
+            Console.WriteLine("ladda filnamn                      ladda specifierad fil\n");
+            
+            Console.WriteLine("lista                              lista aktiva uppgifter");
+            Console.WriteLine("lista allt/väntande/klara          lista alla/väntande/klara uppgifter\n");
+
+            Console.WriteLine("beskriv                            lista alla Active uppgifter, status, prioritet, namn och beskrivning");
+            Console.WriteLine("beskriv allt                       lista alla uppgifter (oavsett status), status, prioritet, namn och beskrivning\n");
+
+            Console.WriteLine("spara                              spara uppgifterna");
+            Console.WriteLine("spara /fil/                        spara uppgifterna på filen /fil/\n");
+
+            Console.WriteLine("aktivera /uppgift/                 sätt status på uppgift till Active");
+            Console.WriteLine("klar /uppgift/                     sätt status på uppgift till Ready");
+            Console.WriteLine("vänta /uppgift/                    sätt status på uppgift till Waiting\n");
+
+
+            Console.WriteLine("ny                                 skapa en ny uppgift");
+            Console.WriteLine("ny /uppgift/                       skapa en ny uppgift med namnet /uppgift/\n");
+
+            Console.WriteLine("redigera /uppgift/                 redigera en uppgift med namnet /uppgift/");
+            Console.WriteLine("kopiera /uppgift/                  kopiera en uppgift, samma prio men status Active\n");
+
+            Console.WriteLine("sluta                              spara senast laddade filen och avsluta programmet!");
+
+
+
+
         }
 
 
-        public static string makeTasksname(string[] command) // puts together words from the task´s name
+        public static string MakeTasksName(string[] command) // get array of words and puts them togethers making the task´s name
         {
             string subcommand = " ";
             for (int i = 1; i < command.Length; i++)
@@ -197,9 +224,9 @@ namespace dtp15_todolist
             subcommand = subcommand.Trim();
             return subcommand;
         }
-        public static bool ChangeStatus(string[] command)
+        public static bool ChangeStatus(string[] command) // status of the task, changing between AKTIV, VÄNTANDE,AVKLARANDE
         {
-            string subcommand = makeTasksname(command);
+            string subcommand = MakeTasksName(command);
 
             foreach (TodoItem item in list)
             {
@@ -234,7 +261,7 @@ namespace dtp15_todolist
 
             if (nameExists)
             {
-                subcommand = makeTasksname(name); 
+                subcommand = MakeTasksName(name); 
             }
             else if (!nameExists)
             {
@@ -243,7 +270,7 @@ namespace dtp15_todolist
             }
 
             Console.Write("Prioritet: ");
-            string prio = Console.ReadLine(); // 546
+            string prio = Console.ReadLine(); 
 
             
             prio = prio.Trim();
@@ -264,13 +291,29 @@ namespace dtp15_todolist
             return successed;
 
         }
+
+        public static void CopyTask(string[] tasksname)
+        {
+            string subcommand = MakeTasksName(tasksname);
+            bool correctName;
+            TodoItem task = FindObject(subcommand, out correctName);
+            if ((correctName) && (task != null))
+            {
+                // public TodoItem(string task, int priority, string taskDescription, int status) // need for adding new tasks 
+                string newNameOfTask = task.task + ", 2";
+                TodoItem newTask = new TodoItem(newNameOfTask, task.priority, task.taskDescription, 1);
+                list.Add(newTask);
+                Console.WriteLine($"Task {task.task} copied!");
+            }
+            else Console.WriteLine("ERROR! Wrong name!");
+        }
         public static void EditTask(string[] tasksname)
         {
-            string subcommand = makeTasksname(tasksname);
-            bool correctName = false;
+            string subcommand = MakeTasksName(tasksname);
+            bool correctName;
+            TodoItem task = FindObject(subcommand, out correctName);
 
-            TodoItem task = null;
-            foreach (TodoItem item in list)
+            /*foreach (TodoItem item in list)
             {
                 if (subcommand == item.task)
                 {
@@ -278,9 +321,9 @@ namespace dtp15_todolist
                     correctName = true; 
                     break;
                 }
-            }
+            }*/
 
-            if (correctName && task != null)
+            if ( (correctName) && (task != null) )
             {
                 Console.WriteLine("Tryck [enter] om du inte vill ändra!");
                 Console.Write($"Uppgiftens namn ({subcommand}): ");
@@ -329,13 +372,30 @@ namespace dtp15_todolist
             else Console.WriteLine($"ERROR! Task {subcommand} was not found!");
 
         }
+        public static TodoItem FindObject(string subcommand, out bool correctName)
+        {
+            correctName = false;
+
+            TodoItem task = null;
+            foreach (TodoItem item in list)
+            {
+                if (subcommand == item.task)
+                {
+                    task = item;
+                    correctName = true;
+                    break;
+                }
+            }
+            return task;
+        }
+
     }
     class MainClass
     {
         public static void Main(string[] args)
         {
             Console.WriteLine("Välkommen till att-göra-listan!");
-         //   Todo.ReadListFromFile();
+         // Todo.ReadListFromFile();
             Todo.PrintHelp();
             string command;
             do
@@ -347,40 +407,40 @@ namespace dtp15_todolist
                 }
                 else if (MyIO.Equals(command, "sluta"))
                 {
+                    string fileName = Todo.getFileInUse();
+                    if(fileName != null) Todo.WriteListToFile(fileName); // spara senast laddade filen och avsluta programmet!
+
                     Console.WriteLine("Hej då!");
                     break;
                 }
                 else if (MyIO.Equals(command, "lista"))
                 {
-                    if (MyIO.HasArgument(command, "allt")) { } // command has both LISTA and ALLT
-                    else if (MyIO.HasArgument(command, "väntande")) { } // command has both LISTA and VÄNTANDE
-                    else if (MyIO.HasArgument(command, "klara")) { } // command has both LISTA and KLARA
-
+                    if (MyIO.HasArgument(command, "allt")) { } // LISTA & ALLT
+                    else if (MyIO.HasArgument(command, "väntande")) { } //  LISTA & VÄNTANDE
+                    else if (MyIO.HasArgument(command, "klara")) { } //  LISTA & KLARA
                     else if (!MyIO.HasArgument(command)) Todo.PrintTodoList(verbose: false, "aktiva"); // visar bara aktiva, kommando.Length <2
-
-
                     else if (MyIO.HasArgument(command, "")) { } // has to be LISTA & wrong command
 
                 }
                 else if (MyIO.Equals(command, "beskriv"))
                 {
-                    if (MyIO.HasArgument(command, "allt")) { } // show all with description
-                    else if (!MyIO.HasArgument(command)) Todo.PrintTodoList(verbose: true, "aktiva");  // show active with description OK
-                    else if (MyIO.HasArgument(command, "")) { }
+                    if (MyIO.HasArgument(command, "allt")) { } // BESKRIV & ALLT
+                    else if (!MyIO.HasArgument(command)) Todo.PrintTodoList(verbose: true, "aktiva");  // BESKRIV, shows endast aktiva
+                    else if (MyIO.HasArgument(command, "")) { } // BESKRIV & WRONG INPUT
 
                 }
                 else if (MyIO.Equals(command, "ladda"))
                 {
-                    if (MyIO.HasArgument(command)) { }
-                    else if (!MyIO.HasArgument(command)) Todo.ReadListFromFile();
+                    if (MyIO.HasArgument(command)) { } // LADDA FILENAME.LIS, ex STANISLAVSTODO.LIS
+                    else if (!MyIO.HasArgument(command)) Todo.ReadListFromFile(); // LADDA
                 }
                 else if (MyIO.Equals(command, "spara"))
                 {
                     string fileName = Todo.getFileInUse();
                     if (fileName != null)
                     {
-                        if (MyIO.HasArgument(command)) { }
-                        else if (!MyIO.HasArgument(command))
+                        if (MyIO.HasArgument(command)) { } // SPARA TO ANOTHER DIRECTORY. FILE IN USE != FILE WHERE TO SAVE WILL SHOW AN ERROR
+                        else if (!MyIO.HasArgument(command)) // SPARA, FILE IN USE == FILE WHERE TO SAVE WILL SAVE SUCCESSFULLY.
                         {
                             Todo.WriteListToFile();
                         }
@@ -391,24 +451,24 @@ namespace dtp15_todolist
                 }
                 else if (MyIO.Equals(command, "aktivera"))
                 {
-                    if (MyIO.HasArgument(command)) { }
+                    if (MyIO.HasArgument(command)) { } // change status to AKTIV
                     else Console.WriteLine($"ERROR! Skriv aktivera och ett korrekt namn på uppgiften!");
 
                 }
                 else if (MyIO.Equals(command, "klar"))
                 {
-                    if (MyIO.HasArgument(command)) { }
+                    if (MyIO.HasArgument(command)) { } // CHANGE STATUS TO AVKLARAD
                     else Console.WriteLine($"ERROR! Skriv klar och ett korrekt namn på uppgiften!");
                 }
                 else if (MyIO.Equals(command, "vänta"))
                 {
-                    if (MyIO.HasArgument(command)) { }
+                    if (MyIO.HasArgument(command)) { } // CHANGE STATUS TO VÄNTANDE
                     else Console.WriteLine($"ERROR! Skriv vänta och ett korrekt namn på uppgiften!");
                 }
                 else if (MyIO.Equals(command, "ny"))
                 {
-                    if (MyIO.HasArgument(command, "")) { } // ny uppgiftens namn
-                    else if (!MyIO.HasArgument(command))
+                    if (MyIO.HasArgument(command, "")) { } // ny & uppgiftens namn
+                    else if (!MyIO.HasArgument(command)) // ny, will ask for a new name.
                     {
                         string[] s = new string[1]; Todo.AddTask(s, false);
                     } // ny
@@ -417,10 +477,14 @@ namespace dtp15_todolist
                 }
                 else if (MyIO.Equals(command, "redigera"))
                 {
-                    if (MyIO.HasArgument(command)) { } // redigera köpa kaffe
+                    if (MyIO.HasArgument(command)) { } // redigera & TASK´S NAME
                     else if (!MyIO.HasArgument(command)) { Console.WriteLine("ERROR! Skriv redigera och ett korekt namn på uppgiften!"); }
                 }
-
+                else if (MyIO.Equals(command, "kopiera"))
+                {
+                    if(MyIO.HasArgument(command)) { } // KOPIERA & UPPGIFTENS NAMN
+                    else if (!MyIO.HasArgument(command)) { Console.WriteLine("ERROR! Skriv kopiera och ett korekt namn på uppgiften!"); }
+                }
                 else
                 {
                     Console.WriteLine($"Okänt kommando: {command}");
@@ -447,16 +511,16 @@ namespace dtp15_todolist
             }
             return false;
         }
-        static public bool HasArgument(string rawCommand, string expected = "")
+        static public bool HasArgument(string rawCommand, string expected = "") // universal method that fits all my commands from MainClass
         {
             string command = rawCommand.Trim();
             if (command == "") return false;
             else
             {
                 string[] cwords = command.Split(' ');
-                if (cwords.Length < 2) return false;
+                if (cwords.Length < 2) return false; // only one word in the command
 
-
+                // sends a signal further to the class Todo
                 if (cwords[0] == "ladda")
                 { 
                     expected = cwords[1]; 
@@ -509,8 +573,10 @@ namespace dtp15_todolist
                 }
                 if (cwords[0] == "redigera")
                 { Todo.EditTask(cwords); return true; }
-
-
+                if (cwords[0] == "kopiera")
+                {
+                    Todo.CopyTask(cwords); return true;
+                }
                 return false;
             }
         }
