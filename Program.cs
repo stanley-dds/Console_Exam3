@@ -404,7 +404,6 @@ namespace dtp15_todolist
         public static void Main(string[] args)
         {
             Console.WriteLine("Välkommen till att-göra-listan!");
-         // Todo.ReadListFromFile();
             Todo.PrintHelp();
             string command;
             do
