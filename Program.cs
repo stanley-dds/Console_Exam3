@@ -174,28 +174,36 @@ namespace dtp15_todolist
         }
 
         public static bool ChangeStatus(string[] command)
-        {
-            if (command[0] == "aktivera")
+        {            
+            string subcommand = " ";
+            for (int i = 1; i < command.Length; i++)
+            { 
+                subcommand += command[i] + " ";
+            }
+            subcommand = subcommand.Trim();
+
+            foreach (TodoItem item in list)
             {
-                string subcommand = " ";
-                for (int i = 1; i < command.Length; i++)
-                { 
-                    subcommand += command[i] + " ";
-                }
-                subcommand = subcommand.Trim();
-                foreach (TodoItem item in list)
+                if (item.task == subcommand)
                 {
-                    if(item.task == subcommand)
+                    if (command[0] == "aktivera")
                     {
                         item.status = 1; Console.WriteLine($"status for {item.task.ToUpper()} changed");
                         return true;
                     }
+                    else if (command[0] == "vänta")
+                    {
+                        item.status = 2; Console.WriteLine($"status for {item.task.ToUpper()} changed");
+                        return true;
+                    }
+                    else if (command[0] == "klar")
+                    {
+                        item.status = 3; Console.WriteLine($"status for {item.task.ToUpper()} changed");
+                        return true;
+                    }
+                    
                 }
-            }
-            else if (command[0] == "vänta")
-            { }
-            else if (command[0] == "klar")
-            { }
+            }            
             return false;
         }
     }
@@ -228,15 +236,14 @@ namespace dtp15_todolist
                     else if (!MyIO.HasArgument(command)) Todo.PrintTodoList(verbose: false, "aktiva"); // visar bara aktiva, kommando.Length <2
 
 
-                    else Console.WriteLine($"ERROR! Okänt kommando: {command}"); // has to be LISTA and dsrgtd
+                    else if (MyIO.HasArgument(command, "")) { } // has to be LISTA & wrong command
 
                 }
                 else if (MyIO.Equals(command, "beskriv"))
-                {
-                    // Todo.PrintTodoList(verbose: true); transfer this to command "beskriv allt"
-                    if (!MyIO.HasArgument(command)) { Todo.PrintTodoList(verbose: true, "aktiva"); } // show active with description
-                    else if (MyIO.HasArgument(command, "allt")) Todo.PrintTodoList(verbose: true); // show all with description
-                    else Console.WriteLine($"ERROR! Okänt kommando: {command}");
+                {                    
+                    if (MyIO.HasArgument(command, "allt")) { } // show all with description
+                    else if (!MyIO.HasArgument(command)) Todo.PrintTodoList(verbose: true, "aktiva");  // show active with description OK
+                    else if (MyIO.HasArgument(command, "")) {  }
 
                 }
                 else if (MyIO.Equals(command, "ladda"))
@@ -262,14 +269,19 @@ namespace dtp15_todolist
                 else if (MyIO.Equals(command, "aktivera"))
                 {
                     if (MyIO.HasArgument(command)) { }
-                    else
-                    { Console.WriteLine($"ERROR! Skriv aktivera och ett korrekt namn på uppgiften!"); }
-                   //
+                    else Console.WriteLine($"ERROR! Skriv aktivera och ett korrekt namn på uppgiften!");
+                   
                 }
                 else if (MyIO.Equals(command, "klar"))
-                { }
+                {
+                    if (MyIO.HasArgument(command)) { }
+                    else Console.WriteLine($"ERROR! Skriv klar och ett korrekt namn på uppgiften!");
+                }
                 else if (MyIO.Equals(command, "vänta"))
-                { }
+                {
+                    if (MyIO.HasArgument(command)) { }
+                    else Console.WriteLine($"ERROR! Skriv vänta och ett korrekt namn på uppgiften!");
+                }
 
                 else
                 {
@@ -329,14 +341,18 @@ namespace dtp15_todolist
                     if (cwords[1] == "klara")
                     { Todo.PrintTodoList(verbose: false, "klara"); return true; }
 
-                    if ((cwords.Length >= 2) && (cwords[1] != "allt") && (cwords[1] != "väntande") && (cwords[1] != "klara")) return false;
-                  //  if (expected == "")
-                   // { Todo.PrintTodoList(verbose: false, "aktiva"); return true; }
+                    if ((cwords.Length >= 2) && (cwords[1] != "allt") && (cwords[1] != "väntande") && (cwords[1] != "klara"))
+                    { Console.WriteLine($"ERROR! Okänt kommando: {command}"); return true; }
+
                 }
                 if (cwords[0] == "beskriv")
                 {
-                    if (cwords[1] == "allt") { return true; }
-                    if ( (cwords.Length >= 2) && (cwords[1] != "allt")) return false;
+                    if (cwords[1] == "allt") 
+                    { Todo.PrintTodoList(verbose: true); return true; } //Todo.PrintTodoList(verbose: true); return true; }
+                    if ((cwords.Length >= 2) && (cwords[1] != "allt"))
+                    {
+                        Console.WriteLine($"ERROR! Okänt kommando: {command}"); return true;
+                    }
                        
                 }
                 if (cwords[0] == "aktivera" || cwords[0] == "klar" || cwords[0] == "vänta")
