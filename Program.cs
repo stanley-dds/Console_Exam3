@@ -12,7 +12,7 @@ namespace dtp15_todolist
         public const int Waiting = 2;
         public const int Ready = 3;
 
-        // needs not be able to write tasks to a correct file.
+        // needs not be able to write tasks to a wrong file.
         // prevents a theft of data and transfering it to a 3rd party file.
         private static string fileInUse; 
 
