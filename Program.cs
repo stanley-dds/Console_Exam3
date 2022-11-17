@@ -8,11 +8,13 @@ namespace dtp15_todolist
     public class Todo
     {
         public static List<TodoItem> list = new List<TodoItem>();
-
-        private static string fileInUse;
         public const int Active = 1;
         public const int Waiting = 2;
         public const int Ready = 3;
+
+        // needs not be able to write tasks to a correct file.
+        // prevents a theft of data and transfering it to a 3rd party file.
+        private static string fileInUse; 
 
         public static string getFileInUse() { return fileInUse; }
         public static string StatusToString(int status)
@@ -68,8 +70,11 @@ namespace dtp15_todolist
             } // print the data 
         }
 
-        //This method has been modified
-        // Added: 1) default argument, 2) check if file exists, 3) clearing data from the previous file.
+
+
+
+
+        // Two methods to work with files
         public static void ReadListFromFile(string nameOfFile = "TomkisToDo.lis")
         {
           //  string todoFileName = "todo.lis";
@@ -122,6 +127,12 @@ namespace dtp15_todolist
         }
 
 
+
+
+
+
+
+        // Five methods to do with a PrintOut
         private static void PrintHeadOrFoot(bool head, bool verbose)
         {
             if (head)
@@ -206,54 +217,15 @@ namespace dtp15_todolist
             Console.WriteLine("redigera /uppgift/                 redigera en uppgift med namnet /uppgift/");
             Console.WriteLine("kopiera /uppgift/                  kopiera en uppgift, samma prio men status Active\n");
 
-            Console.WriteLine("sluta                              spara senast laddade filen och avsluta programmet!");
-
+            Console.WriteLine("sluta                              spara senast laddade filen och avsluta programmet!\n");
 
 
 
         }
 
 
-        public static string MakeTasksName(string[] command) // get array of words and puts them togethers making the task´s name
-        {
-            string subcommand = " ";
-            for (int i = 1; i < command.Length; i++)
-            {
-                subcommand += command[i] + " ";
-            }
-            subcommand = subcommand.Trim();
-            return subcommand;
-        }
-        public static bool ChangeStatus(string[] command) // status of the task, changing between AKTIV, VÄNTANDE,AVKLARANDE
-        {
-            string subcommand = MakeTasksName(command);
 
-            foreach (TodoItem item in list)
-            {
-                if (item.task == subcommand)
-                {
-                    if (command[0] == "aktivera")
-                    {
-                        item.status = 1; Console.WriteLine($"status for {item.task.ToUpper()} changed");
-                        return true;
-                    }
-                    else if (command[0] == "vänta")
-                    {
-                        item.status = 2; Console.WriteLine($"status for {item.task.ToUpper()} changed");
-                        return true;
-                    }
-                    else if (command[0] == "klar")
-                    {
-                        item.status = 3; Console.WriteLine($"status for {item.task.ToUpper()} changed");
-                        return true;
-                    }
-                    
-                }
-            }            
-            return false;
-        }
-
-
+        //Six methods to do with a Task
         public static bool AddTask(string[] name, bool nameExists = true)
         {
             bool successed = true;
@@ -291,7 +263,6 @@ namespace dtp15_todolist
             return successed;
 
         }
-
         public static void CopyTask(string[] tasksname)
         {
             string subcommand = MakeTasksName(tasksname);
@@ -387,6 +358,44 @@ namespace dtp15_todolist
                 }
             }
             return task;
+        }
+        public static string MakeTasksName(string[] command) // gets array of words and puts them togethers making the task´s name
+        {
+            string subcommand = " ";
+            for (int i = 1; i < command.Length; i++)
+            {
+                subcommand += command[i] + " ";
+            }
+            subcommand = subcommand.Trim();
+            return subcommand;
+        }
+        public static bool ChangeStatus(string[] command) // status of the task, changing between AKTIV, VÄNTANDE,AVKLARANDE
+        {
+            string subcommand = MakeTasksName(command);
+
+            foreach (TodoItem item in list)
+            {
+                if (item.task == subcommand)
+                {
+                    if (command[0] == "aktivera")
+                    {
+                        item.status = 1; Console.WriteLine($"status for {item.task.ToUpper()} changed");
+                        return true;
+                    }
+                    else if (command[0] == "vänta")
+                    {
+                        item.status = 2; Console.WriteLine($"status for {item.task.ToUpper()} changed");
+                        return true;
+                    }
+                    else if (command[0] == "klar")
+                    {
+                        item.status = 3; Console.WriteLine($"status for {item.task.ToUpper()} changed");
+                        return true;
+                    }
+
+                }
+            }
+            return false;
         }
 
     }
