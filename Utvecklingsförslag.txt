@@ -1,0 +1,11 @@
+I den nya versionen av mitt program vill jag implementera följande:
+
+1) Commando "delete", to be able to remove unnecessary tasks
+
+2) Göra mitt program med WPF och snygga till med bilder
+
+3) lägga till deadlines för taks. Som ytterligare en kolumn när
+användare skriver in kommando "beskriv allt"
+
+4)Sortera tasks smartare, dvs när användare skriver in "lista allt" kommando,
+visas aktiva tasks först, därefter väntande och till slut - avklarade.
