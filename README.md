@@ -20,5 +20,4 @@ Classes used:
 3) MainClass (with commandos functionalities)
 4) MyIO (in order to unload MainClass)
 
-
-
+(kopiera två .lis filer in i bin mappen när .sln körs)
